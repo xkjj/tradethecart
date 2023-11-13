@@ -1,15 +1,37 @@
 const express = require("express");
 let app = express();
 const path = require("path");
+const mysql = require("mysql2");
 
 //middleware
 app.use(express.static(path.join(__dirname, './public')));
 app.set('view engine', 'ejs');
+app.use(express.urlencoded({extended: true}));
+
+const db = mysql.createConnection({ 
+    
+        host:"localhost",
+        user:"root",
+        database:"kjarosz02",
+        password:"",
+        port:"3306",
+
+});
 
 //routes
 app.get("/", (req, res) => {
 
     res.render('tradethecart');
+});
+
+app.get("/signup", (req, res) => {
+
+    res.render('signup');
+});
+
+app.get("/login", (req, res) => {
+
+    res.render('login');
 });
 
 //server

@@ -1,6 +1,5 @@
-.navbar-item   {
-    background-color: #161616;
-    color: white;
+.navbar-item{
+    padding: 15px;
 }
 
 .mytitle{
@@ -8,30 +7,10 @@
     font-weight: bold;
 }
 
-.section {
-    background-color: #161616;
+.content {
+    padding-top: 10px;
 }
 
-.navbar-menu{
-    background-color: #161616;
-}
 
-.button.is-primary {
-    background-color: #7a7a7a;
-    border-color: transparent;
-    color: white;
-}
 
-.button.is-primary a.hover{
-    background-color: #7a7a7a;
-    border-color: transparent;
-    color: white;
-}
 
-.navbar {
-    background-color: #fff;
-    min-height: 3.25rem;
-    min-width: none;
-    position: relative;
-    z-index: 30;
-}
