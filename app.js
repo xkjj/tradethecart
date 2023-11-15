@@ -4,7 +4,6 @@ const path = require("path");
 const mysql = require("mysql2");
 
 //middleware
-app.use(express.static(path.join(__dirname, './public')));
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({extended: true}));
 
@@ -18,15 +17,6 @@ const db = mysql.createConnection({
 
 });
 
-const connection = mysql.createConnection(
-    {
-        host: 'localhost',
-        user: 'root',
-        password: '',
-        database: 'kjarosz02',
-        port: '3306'
-    }
-);
 
 connection.connect((err) => {
 
