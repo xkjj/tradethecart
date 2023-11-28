@@ -22,7 +22,7 @@
         <div class="navbar-menu is-flex-tablet is-flex-touch is-flex-desktop">
           <div class="navbar-start">
             <a class="navbar-item">
-              Home
+              Your Cards
             </a>
       
             <a class="navbar-item">
@@ -55,17 +55,28 @@
           <div class="navbar-end">
             <div class="navbar-item">
               <div class="buttons">
-                <a class="button is-dark" href="/signup">
-                  <strong>Sign up</strong>
+                <a class="button is-dark" href="">
+                  <strong>Hello, <%= userdata.firstname %></strong>
                 </a>
-                <a class="button is-light" href="/login">
-                  Log in
+                <a class="button is-light" href="/">
+                  <strong>Logout</strong>
                 </a>
               </div>
             </div>
           </div>
         </div>
       </nav>
+
+      <section class="hero is-dark">
+        <div class="hero-body">
+          <p class="title">
+            Welcome to tradethecart!
+          </p>
+          <p class="subtitle">
+            For all your Pokemon trading needs
+          </p>
+        </div>
+      </section>
     
 </body>
 

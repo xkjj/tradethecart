@@ -1,5 +1,6 @@
 .navbar-item{
     padding: 15px;
+    font-size: 30px;
 }
 
 .mytitle{
@@ -9,6 +10,12 @@
 
 .content {
     padding-top: 10px;
+}
+
+.userlabel {
+    font-size: 30px;
+    font-weight: bold;
+    color: white;
 }
 
 
