@@ -51,31 +51,46 @@ app.post('/', (req, res) => {
         if (numRows > 0) {
             const sessionobj = req.session;
             sessionobj.authen = rows[0].id;
+
+            db.query(checkpass, (err, rows2) => {
+                if (err) throw err;
+                const numRows2 = rows2.length;
+
+                if (numRows2 > 0) {
+                    const sessionobj = req.session;
+                    sessionobj.authen = rows2[0].id;
+                    res.redirect('/tradethecart')
+                } else {
+                    res.send("invalid password");
+                }
+            })
         } else {
             res.send("user does not exist");
         }
-
-        db.query(checkpass, (err, rows2) => {
-            if (err) throw err;
-            const numRows2 = rows2.length;
-
-            if (numRows2 > 0) {
-                const sessionobj = req.session;
-                sessionobj.authen = rows2[0].id;
-                res.redirect('/tradethecart')
-            } else {
-                res.send("invalid password");
-            }
-
-        })
-
     })
-
 });
 
 app.get('/signup', (req, res) => {
-    res.render('signup');
 
+    let getusers = `SELECT * FROM tradethecart_users`
+    db.query(getusers, (err, rows) => {
+        if (err) throw err;
+        res.render('signup', { users: rows });
+    });
+});
+
+app.post('/signup', (req, res) => {
+    const firstN = req.body.firstname_field;
+    const surN = req.body.surname_field;
+    const userN = req.body.username_field;
+    const passW = req.body.password_field;
+
+    const insertusersSQL = `INSERT into tradethecart_users (firstname, surname, username, password) values ('${firstN}', '${surN}','${userN}','${passW}'); `;
+
+    db.query(insertusersSQL, (err, result) => {
+        if (err) throw err;
+        res.send(result);
+    });
 });
 
 app.get('/tradethecart', (req, res) => {
@@ -85,14 +100,43 @@ app.get('/tradethecart', (req, res) => {
         const user = `SELECT * FROM tradethecart_users WHERE id = "${uid}"`;
 
         db.query(user, (err, row) => {
+            if (err) throw err;
             const firstrow = row[0];
-            res.render('tradethecart', {userdata:firstrow});
+            res.render('tradethecart', { userdata: firstrow });
         });
     } else {
         res.send("Access denied");
     }
-    
 });
+
+app.get('/logout', (req, res) => {
+
+    const sessionobj = req.session;
+
+    if (sessionobj.authen) {
+        const uid = sessionobj.authen;
+        req.session.destroy();
+        res.redirect('/');
+    }
+
+});
+
+app.get('/yourcards', (req, res) => {
+    const sessionobj = req.session;
+    if (sessionobj.authen) {
+        const uid = sessionobj.authen;
+        const readcards = `SELECT * FROM tradethecart_users WHERE id = "${uid}";
+                              SELECT * FROM tradethecart_user_cards WHERE user_id = "${uid}";`;
+        
+
+        db.query(readcards, (err, row) => {
+            if (err) throw err;
+            const firstrow = row[0];
+            res.render('yourcards', { usercards: firstrow, userdata: firstrow });
+        });
+    } 
+});
+
 
 //server
 app.listen(process.env.PORT || 3000);

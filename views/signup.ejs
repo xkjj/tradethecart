@@ -14,50 +14,50 @@
     <div class="container is-max-desktop">
 
         <div class="content">
-            <h1>Sign up</h1>
+            <form method="POST" action="/">
+                <h1>Sign up</h1>
+        </div>
+
+        <div class="field">
+            <label class="label">First Name</label>
+            <div class="control">
+                <input class="input" type="text" placeholder="e.g Joe" name="firstname_field">
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="label">Surname</label>
+            <div class="control">
+                <input class="input" type="text" placeholder="e.g. Smith" name="surname_field">
+            </div>
         </div>
 
         <div class="field">
             <label class="label">Username</label>
             <div class="control">
-                <input class="input" type="text" placeholder="e.g zkjj15">
-            </div>
-        </div>
-
-        <div class="field">
-            <label class="label">Email</label>
-            <div class="control">
-                <input class="input" type="email" placeholder="e.g. alexsmith@gmail.com">
+                <input class="input" type="text" placeholder="e.g. jsmith123" name="username_field">
             </div>
         </div>
 
         <div class="field">
             <label class="label">Password</label>
             <div class="control">
-                <input class="input" type="password" placeholder="Enter a strong password">
-            </div>
-        </div>
-
-        <div class="field">
-            <label class="label">Gender</label>
-            <div class="control">
-                <div class="select">
-                    <select>
-                        <option>Male</option>
-                        <option>Female</option>
-                    </select>
-                </div>
+                <input class="input" type="password" placeholder="Enter a memorable password" name="password_field">
             </div>
         </div>
 
 
         <div class="field is-grouped">
             <div class="control">
-                <input class="button is-black" type="submit" href="/">
+                <input class="button is-black" type="submit" href="/tradethecart">
+            </div>
+            <div class="control">
+                <a class="button is-light" href="#">Continue as Guest</a>
             </div>
             <div class="control">
                 <a class="button is-light" href="/">Cancel</a>
             </div>
+            </form>
         </div>
     </div>
 
