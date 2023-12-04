@@ -55,9 +55,6 @@
           <div class="navbar-end">
             <div class="navbar-item">
               <div class="buttons">
-                <a class="button is-dark" href="">
-                  <strong>Hello, <%= userdata.firstname %></strong>
-                </a>
                 <a class="button is-light" href="/logout">
                   <strong>Logout</strong>
                 </a>
@@ -73,10 +70,18 @@
             Your card collection
           </p>
           <p class="subtitle">
-            view and make changes to your collection
+            View and make changes to your collection
           </p>
         </div>
       </section>
+
+      <div class="card">
+        <div class="card-image">
+          <figure class="image is-4by3">
+            <img src=" <%= carddata.pokemon_img %>" alt="Placeholder image">
+          </figure>
+        </div>
+      </div>
     
 </body>
 

@@ -111,28 +111,37 @@ app.get('/tradethecart', (req, res) => {
 
 app.get('/logout', (req, res) => {
 
-    const sessionobj = req.session;
-
-    if (sessionobj.authen) {
-        const uid = sessionobj.authen;
-        req.session.destroy();
+    req.session.destroy((err) => {
+        if (err) throw err;
         res.redirect('/');
-    }
 
+    });
+
+});
+
+app.get('/catalogue', (req, res) => {
+    const showcards = `SELECT * FROM tradethecart_pokemon LIMIT 9`;
+
+    db.query(showcards, (err, rows) => {
+        if (err) throw err;
+        res.render('catalogue', {cards: rows});
+
+    });
+    
 });
 
 app.get('/yourcards', (req, res) => {
     const sessionobj = req.session;
     if (sessionobj.authen) {
         const uid = sessionobj.authen;
-        const readcards = `SELECT * FROM tradethecart_users WHERE id = "${uid}";
-                              SELECT * FROM tradethecart_user_cards WHERE user_id = "${uid}";`;
+        const sqlread = `SELECT * FROM tradethecart_users WHERE id = '${uid}';
+                            SELECT * FROM tradethecart_user_cards WHERE user_id = '${uid}';`;
         
 
-        db.query(readcards, (err, row) => {
+        db.query(sqlread, (err, row) => {
             if (err) throw err;
-            const firstrow = row[0];
-            res.render('yourcards', { usercards: firstrow, userdata: firstrow });
+            res.render('yourcards', {cards: row[0]});
+
         });
     } 
 });

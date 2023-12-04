@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Catalogue</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body>
+    <nav class="navbar is-black" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item mytitle">
+                tradethecart
+            </a>
+
+
+        </div>
+
+        <div class="navbar-menu is-flex-tablet is-flex-touch is-flex-desktop">
+            <div class="navbar-start">
+                <a class="navbar-item" href="/yourcards">
+                    Your Cards
+                </a>
+
+                <a class="navbar-item">
+                    Catalogue
+                </a>
+
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link mydropdown">
+                        More
+                    </a>
+
+                    <div class="navbar-dropdown">
+                        <a class="navbar-item">
+                            About
+                        </a>
+                        <a class="navbar-item">
+                            Jobs
+                        </a>
+                        <a class="navbar-item">
+                            Contact
+                        </a>
+                        <hr class="navbar-divider">
+                        <a class="navbar-item">
+                            Report an issue
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <div class="buttons">
+                        <a class="button is-light" href="/logout">
+                            <strong>Logout</strong>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero is-dark">
+        <div class="hero-body">
+            <p class="title">
+                Card catalogue
+            </p>
+            <p class="subtitle">
+                Browse all available cards
+            </p>
+        </div>
+    </section>
+
+    <div class="columns">
+        <% cards.forEach(card=> { %>
+
+            <div class="card">
+                <div class="card-image">
+                  <figure class="image">
+                    <img src=" <%= card.pokemon_img %>" alt="Placeholder image">
+                  </figure>
+                </div>
+              </div>
+
+          <% }); %>
+        </div>
+</body>
+
+</html>
