@@ -1,23 +1,25 @@
-.navbar-item{
-    padding: 15px;
-    font-size: 30px;
+.btn-outline-dark:focus{
+    box-shadow:none;
 }
 
-.mytitle{
-    font-size: 30px;
-    font-weight: bold;
+@media screen and (max-width:768px) {
+    .btn-outline-dark{
+        border:none;
+        padding:0;
+        outline:none;
+    }
+
+    .btn-outline-dark:hover{
+        background:none;
+        color:black;
+    }
+
 }
 
-.content {
-    padding-top: 10px;
+.navbar{
+    padding-bottom: 20px;
 }
 
-.userlabel {
-    font-size: 30px;
-    font-weight: bold;
-    color: white;
+.card{
+    margin-bottom: 10px;
 }
-
-
-
-

@@ -124,26 +124,40 @@ app.get('/catalogue', (req, res) => {
 
     db.query(showcards, (err, rows) => {
         if (err) throw err;
-        res.render('catalogue', {cards: rows});
+        res.render('catalogue', { allcards: rows });
 
     });
-    
+
 });
 
 app.get('/yourcards', (req, res) => {
     const sessionobj = req.session;
     if (sessionobj.authen) {
         const uid = sessionobj.authen;
-        const sqlread = `SELECT * FROM tradethecart_users WHERE id = '${uid}';
-                            SELECT * FROM tradethecart_user_cards WHERE user_id = '${uid}';`;
-        
-
-        db.query(sqlread, (err, row) => {
+        const getuser = `SELECT tradethecart_users.id, tradethecart_users.firstname, tradethecart_users.username
+                                FROM tradethecart_users
+                                INNER JOIN tradethecart_user_cards ON
+                                tradethecart_users.id = tradethecart_user_cards.user_id
+                                WHERE tradethecart_users.id = ${uid};`;
+                                
+        db.query(getuser, (err, rows) => {
             if (err) throw err;
-            res.render('yourcards', {cards: row[0]});
 
+            let getuser = rows[0].id;
+            const getcards = `SELECT * 
+                                FROM tradethecart_pokemon
+                                INNER JOIN tradethecart_user_cards ON
+                                tradethecart_pokemon.id = tradethecart_user_cards.card_id
+                                WHERE tradethecart_user_cards.user_id = ${getuser};`;
+
+            db.query(getcards, (err, rows2) => {
+                if (err) throw err;
+                res.render('yourcards', { userdata: rows, carddata: rows2 })
+            });
         });
-    } 
+    } else {
+        res.send("Access denied");
+    }
 });
 
 
