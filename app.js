@@ -87,9 +87,9 @@ app.post('/signup', (req, res) => {
 
     const insertusersSQL = `INSERT into tradethecart_users (firstname, surname, username, password) values ('${firstN}', '${surN}','${userN}','${passW}'); `;
 
-    db.query(insertusersSQL, (err, result) => {
+    db.query(insertusersSQL, (err, rows) => {
         if (err) throw err;
-        res.send(result);
+        res.redirect('/usercreated');
     });
 });
 
@@ -158,6 +158,71 @@ app.get('/yourcards', (req, res) => {
     } else {
         res.send("Access denied");
     }
+});
+
+app.get("/usercreated", (req, res) => {
+
+    let getusers = `SELECT * FROM tradethecart_users;`;
+
+    db.query(getusers, (err, rows) => {
+        if (err) throw err;
+        res.render('usercreated', { usercreated: rows });
+    });
+});
+
+app.get('/dashboard', (req, res) => {
+    const sessionobj = req.session;
+    if (sessionobj.authen) {
+        const uid = sessionobj.authen;
+        const user = `SELECT * FROM tradethecart_users WHERE id = "${uid}" `;
+        
+        db.query(user, (err, row)=>{ 
+            if (err) throw err;
+            const firstrow = row[0];
+            res.render('dashboard', {userdata: firstrow});
+        });
+    } else {
+        res.send("Access denied");
+    }
+});
+
+app.get('/addcard', (req, res) => {
+    const sessionobj = req.session;
+    if (sessionobj.authen) {
+        const uid = sessionobj.authen;
+        const user = `SELECT * FROM tradethecart_users WHERE id = "${uid}" `;
+
+        db.query(user, (err, row)=>{ 
+            if (err) throw err;
+            
+            const getcards = `SELECT * FROM tradethecart_pokemon ORDER BY pokemon_name ASC`
+            db.query(getcards, (err, row2)=>{ 
+                if (err) throw err;
+                
+              res.render('addcard', {userdata: row, carddata: row2})
+                
+            });
+            
+        });
+    } else {
+        res.send("Access denied");
+    }
+});
+
+app.post('/addcard', (req,res) => {
+    const sessionobj = req.session;
+    const pokemon = req.body.pokemon_card;
+    const uid = sessionobj.authen;
+
+    const insertcardsql = `INSERT INTO tradethecart_user_cards (user_id, card_id) VALUES ('${uid}', '${pokemon}');`;
+
+    db.query(insertcardsql, (err, result) => {
+        if (err) throw err;
+
+        res.send('Added card')
+
+    });
+
 });
 
 
