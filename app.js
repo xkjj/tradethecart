@@ -23,6 +23,7 @@ const db = mysql.createConnection({
     database: "kjarosz02",
     password: "",
     port: "3306",
+    multipleStatements: true,
 
 });
 
@@ -95,6 +96,7 @@ app.post('/signup', (req, res) => {
 
 app.get('/tradethecart', (req, res) => {
     const sessionobj = req.session;
+    
     if (sessionobj.authen) {
         const uid = sessionobj.authen;
         const user = `SELECT * FROM tradethecart_users WHERE id = "${uid}"`;
@@ -102,10 +104,19 @@ app.get('/tradethecart', (req, res) => {
         db.query(user, (err, row) => {
             if (err) throw err;
             const firstrow = row[0];
-            res.render('tradethecart', { userdata: firstrow });
+
+            const allcards = `(SELECT * FROM tradethecart_pokemon ORDER BY id DESC limit 5)
+            ORDER BY id ASC;`;
+
+            db.query(allcards, (err,row2) => {
+                if (err) throw err;
+
+                res.render('tradethecart', { userdata: firstrow, allcards: row2 });
+            });
+            
         });
     } else {
-        res.send("Access denied");
+        res.redirect('/noaccess');
     }
 });
 
@@ -120,11 +131,20 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/catalogue', (req, res) => {
-    const showcards = `SELECT * FROM tradethecart_pokemon LIMIT 9`;
+    const limit = 8;
+    let offset = 0;
+    const page = req.query.page;
+    offset = (page - 1) * limit;
+    if (Number.isNaN(offset)) offset = 0;
+
+    const showcards = `SELECT id FROM tradethecart_pokemon;
+    SELECT * FROM tradethecart_pokemon LIMIT ${limit} OFFSET ${offset}`;
 
     db.query(showcards, (err, rows) => {
         if (err) throw err;
-        res.render('catalogue', { allcards: rows });
+        const totalRows = rows[0].length;
+        const pageCount = Math.ceil(totalRows / limit);
+        res.render('catalogue', { allcards: rows[1], num_pages: pageCount });
 
     });
 
@@ -139,7 +159,7 @@ app.get('/yourcards', (req, res) => {
                                 INNER JOIN tradethecart_user_cards ON
                                 tradethecart_users.id = tradethecart_user_cards.user_id
                                 WHERE tradethecart_users.id = ${uid};`;
-                                
+
         db.query(getuser, (err, rows) => {
             if (err) throw err;
 
@@ -156,7 +176,7 @@ app.get('/yourcards', (req, res) => {
             });
         });
     } else {
-        res.send("Access denied");
+        res.redirect('/noaccess');
     }
 });
 
@@ -175,14 +195,14 @@ app.get('/dashboard', (req, res) => {
     if (sessionobj.authen) {
         const uid = sessionobj.authen;
         const user = `SELECT * FROM tradethecart_users WHERE id = "${uid}" `;
-        
-        db.query(user, (err, row)=>{ 
+
+        db.query(user, (err, row) => {
             if (err) throw err;
             const firstrow = row[0];
-            res.render('dashboard', {userdata: firstrow});
+            res.render('dashboard', { userdata: firstrow });
         });
     } else {
-        res.send("Access denied");
+        res.redirect('/noaccess');
     }
 });
 
@@ -192,24 +212,24 @@ app.get('/addcard', (req, res) => {
         const uid = sessionobj.authen;
         const user = `SELECT * FROM tradethecart_users WHERE id = "${uid}" `;
 
-        db.query(user, (err, row)=>{ 
+        db.query(user, (err, row) => {
             if (err) throw err;
-            
+
             const getcards = `SELECT * FROM tradethecart_pokemon ORDER BY pokemon_name ASC`
-            db.query(getcards, (err, row2)=>{ 
+            db.query(getcards, (err, row2) => {
                 if (err) throw err;
-                
-              res.render('addcard', {userdata: row, carddata: row2})
-                
+
+                res.render('addcard', { userdata: row, carddata: row2 })
+
             });
-            
+
         });
     } else {
-        res.send("Access denied");
+        res.redirect('/noaccess');
     }
 });
 
-app.post('/addcard', (req,res) => {
+app.post('/addcard', (req, res) => {
     const sessionobj = req.session;
     const pokemon = req.body.pokemon_card;
     const uid = sessionobj.authen;
@@ -219,10 +239,105 @@ app.post('/addcard', (req,res) => {
     db.query(insertcardsql, (err, result) => {
         if (err) throw err;
 
-        res.send('Added card')
+        res.redirect('/addcard')
 
     });
 
+});
+
+app.get('/createcard', (req, res) => {
+    const sessionobj = req.session;
+    if (sessionobj.authen) {
+        const uid = sessionobj.authen;
+        const user = `SELECT * FROM tradethecart_users WHERE id = "${uid}" `;
+
+        db.query(user, (err, row) => {
+            if (err) throw err;
+
+            const getcards = `SELECT * FROM tradethecart_pokemon ORDER BY pokemon_name ASC`
+            db.query(getcards, (err, row2) => {
+                if (err) throw err;
+
+                const gettypes = `SELECT * FROM tradethecart_types`
+                db.query(gettypes, (err, row3) => {
+                    if (err) throw err;
+
+                    const getsets = `SELECT * from tradethecart_set;`;
+                    db.query(getsets, (err, row4) => {
+                        if (err) throw err;
+
+                        res.render('createcard', { userdata: row, carddata: row2, typedata: row3, setdata: row4 })
+                    });
+
+                });
+
+            });
+
+        });
+    } else {
+        res.redirect('/noaccess');
+    }
+});
+
+app.post('/createcard', (req, res) => {
+    const sessionobj = req.session;
+    const pokeN = req.body.pokemonname_field;
+    const pokeT = req.body.pokemontype_field;
+    const pokeHP = req.body.pokemonhp_field;
+    const pokeS = req.body.pokemonset_field;
+    const pokeI = req.body.pokemonimg_field;
+    const uid = sessionobj.authen;
+
+    const insertcardsql = `INSERT INTO tradethecart_pokemon (set_id, pokemon_name, pokemon_hp, type_id, pokemon_img) VALUES ('${pokeS}', '${pokeN}', '${pokeHP}', '${pokeT}', '${pokeI}');`;
+
+        db.query(insertcardsql, (err, result2) => {
+            if (err) throw err;
+
+            res.redirect('/addcard')
+        });
+
+    });
+
+app.get('/createset', (req, res) => {
+    const sessionobj = req.session;
+    if (sessionobj.authen) {
+        const uid = sessionobj.authen;
+        const user = `SELECT * FROM tradethecart_users WHERE id = "${uid}" `;
+
+        db.query(user, (err, row) => {
+            if (err) throw err;
+
+            const getsets = `SELECT * FROM tradethecart_set`
+            db.query(getsets, (err, row2) => {
+                if (err) throw err;
+
+                res.render('createset', { userdata: row, setdata: row2 })
+
+            });
+
+        });
+    } else {
+        res.redirect('/noaccess');
+    }
+});
+
+app.post('/createset', (req, res) => {
+    const setN = req.body.pokemonset_field;
+
+    const insertsetsql = `INSERT INTO tradethecart_set (set_name) VALUES ('${setN}');`;
+
+    db.query(insertsetsql, (err, result) => {
+        if (err) throw err;
+
+        res.redirect('/createcard')
+
+    });
+
+});
+
+app.get("/noaccess", (req, res) => {
+
+        res.render('noaccess');
 });
 
 
