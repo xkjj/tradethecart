@@ -105,15 +105,15 @@ app.get('/tradethecart', (req, res) => {
         const firstrow = row[0];
 
         const usercards = `SELECT
-        tradethecart_users.id AS user_id,
-        tradethecart_users.username,
-        GROUP_CONCAT(tradethecart_pokemon.id) AS card_ids
-    FROM
-        tradethecart_users
-    LEFT JOIN tradethecart_user_cards ON tradethecart_users.id = tradethecart_user_cards.user_id
-    LEFT JOIN tradethecart_pokemon ON tradethecart_user_cards.card_id = tradethecart_pokemon.id
-    GROUP BY
-        tradethecart_users.id;`;
+                                tradethecart_users.id AS user_id,
+                                tradethecart_users.username,
+                                GROUP_CONCAT(tradethecart_pokemon.id) AS card_ids
+                            FROM
+                                tradethecart_users
+                            LEFT JOIN tradethecart_user_cards ON tradethecart_users.id = tradethecart_user_cards.user_id
+                            LEFT JOIN tradethecart_pokemon ON tradethecart_user_cards.card_id = tradethecart_pokemon.id
+                            GROUP BY
+                                tradethecart_users.id;`;
 
         db.query(usercards, (err, row2) => {
             if (err) throw err;
