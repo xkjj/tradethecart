@@ -365,10 +365,12 @@ app.post('/createcard', (req, res) => {
     const pokeI = req.body.pokemonimg_field;
     const uid = sessionobj.authen;
 
-    const insertcardsql = `INSERT INTO tradethecart_pokemon (set_id, pokemon_name, pokemon_hp, type_id, description, pokemon_img) VALUES ('${pokeS}', '${pokeN}', '${pokeHP}', '${pokeT}', '${pokeD}', '${pokeI}');`;
+    const insertcardsql = `INSERT INTO tradethecart_pokemon (set_id, pokemon_name, pokemon_hp, type_id, description, pokemon_img) 
+                            VALUES ('${pokeS}', '${pokeN}', '${pokeHP}', '${pokeT}', '${pokeD}', '${pokeI}');`;
 
     db.query(insertcardsql, (err, result2) => {
         if (err) throw err;
+        console.log(result2);
 
         res.redirect('/dashboard')
     });
