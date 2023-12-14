@@ -28,12 +28,12 @@
                         <a class="nav-link " href="/catalogue">Catalogue</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/yourcards">Your Collection</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                        <a class="nav-link active" href="/dashboard">Dashboard</a>
                     </li>
                 </ul>
+                <div>
+                    <a class="btn" href="#">Hello, <%=userdata.username%></a>
+                </div>
                 <a class="btn btn-outline-light" href="/logout">Logout</a>
             </div>
         </div>
@@ -48,33 +48,42 @@
             </div>
             <div class="lc-block col-md-8">
                 <div editable="rich">
-                    <p class="lead">View every card in your own collection.
+                    <p class="lead">View every card in your own collection, or remove any unwanted cards.
                     </p>
                 </div>
             </div>
+            <form class="d-flex" role="search" action="/yourcards" method="GET">
+                <input class="form-control me-2" type="search" name="search" placeholder="Search for a specific card"
+                    aria-label="Search">
+                <button class="btn btn-outline-light" type="submit">Search</button>
+            </form>
+            <a class="btn btn-light mt-3" href="/dashboard">Back</a>
         </div>
     </div>
 
     <div class="container my-4 text-centre">
-
+        <h1 class="mb-4">
+            <% if (searchQuery) { %> Search results for '<%= searchQuery %>'<% } %>
+        </h1>
         <div class="row row-cols-4">
-
             <% carddata.forEach((card)=> { %>
-
-                <div class="col">
-                <div class="card mb-3" style="width: 18rem;">
-                    <img src="<%=card.pokemon_img %>" class="card-img-top" alt="">
-                    <div class="card-body">
-                        <h5 class="card-title"><%= card.pokemon_name %></h5>
-                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                        <a href="#" class="btn btn-primary">View</a>
-                      </div>
-                </div>
-                </div>
-
+                <form method="POST" action="/yourcards">
+                    <div class="col">
+                        <div class="card mb-3" style="width: 18rem;">
+                            <img src="<%=card.pokemon_img %>" class="card-img-top" alt=""
+                                style="width:286px; height:393px">
+                            <div class="card-body">
+                                <input type="hidden" class="form-control" name="id_field" value="<%=card.id%>">
+                                <h5 class="card-title">
+                                    <%= card.pokemon_name %>
+                                </h5>
+                                <p class="card-text"></p>
+                                <button class="btn btn-dark" type="submit">Delete from collection</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
                 <% }); %>
-
-
         </div>
     </div>
 

@@ -31,6 +31,9 @@
                         <a class="nav-link active" href="/dashboard">Dashboard</a>
                     </li>
                 </ul>
+                <div>
+                    <a class="btn" href="#">Hello, <%=userdata.username%></a>
+                </div>
                 <a class="btn btn-outline-light" href="/logout">Logout</a>
             </div>
         </div>
@@ -40,12 +43,15 @@
         <div class="p-4 mb-4 lc-block">
             <div class="lc-block">
                 <div editable="rich">
-                    <h2 class="fw-bolder display-3"><%= userdata.username %>'s dashboard</h2>
+                    <h2 class="fw-bolder display-3">
+                        <%= userdata.username %>'s dashboard
+                    </h2>
                 </div>
             </div>
             <div class="lc-block col-md-8">
                 <div editable="rich">
-                    <p class="lead">This is your dashboard. Here, you can add cards, create new ones as well as make necessary changes to your collection.
+                    <p class="lead">This is your dashboard. Here, you can add and update existing cards, create new ones as well as make
+                        necessary changes to your collection.
                     </p>
                 </div>
             </div>
@@ -56,40 +62,54 @@
 
         <div class="row row-cols-3">
 
-                <div class="col">
+            <div class="col d-flex justify-content-center">
                 <div class="card mb-3" style="width: 20rem;">
                     <div class="card-body">
                         <h5 class="card-title">Add cards</h5>
-                        <p class="card-text">Search and select through cards from our catalogue and add them to your collection.</p>
+                        <p class="card-text">Search and select through cards from our catalogue and add them to your
+                            collection.</p>
                         <a href="/addcard" class="btn btn-dark">Add</a>
-                      </div>
-                </div>
-                </div>
-
-                <div class="col">
-                    <div class="card mb-3" style="width: 20rem;">
-                        <div class="card-body">
-                            <h5 class="card-title">Create cards</h5>
-                            <p class="card-text">Create a new card by filling in the form with Pokemon data and add it to our collection using this tool.</p>
-                            <a href="/createcard" class="btn btn-dark">Create</a>
-                          </div>
                     </div>
+                </div>
+            </div>
+
+            <div class="col d-flex justify-content-center">
+                <div class="card mb-3" style="width: 20rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">Create cards</h5>
+                        <p class="card-text">Create a new card by filling in the form with Pokemon data and add it to
+                            our collection using this tool.</p>
+                        <a href="/createcard" class="btn btn-dark">Create</a>
                     </div>
+                </div>
+            </div>
 
-                    <div class="col">
-                        <div class="card mb-3" style="width: 20rem;">
-                            <div class="card-body">
-                                <h5 class="card-title">Edit cards</h5>
-                                <p class="card-text">Update the details of cards within your collection, or remove any unwanted cards.</p>
-                                <a href="/editcard" class="btn btn-dark">Edit</a>
-                              </div>
-                        </div>
-                        </div>
-
-
-
+            <div class="col d-flex justify-content-center">
+                <div class="card mb-3" style="width: 20rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">View collection</h5>
+                        <p class="card-text">View your entire collection of Pokemon cards and remove any unwanted cards from it.</p>
+                        <a href="/yourcards" class="btn btn-dark">View</a>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <div class="row ">
+        <div class="col d-flex justify-content-center">
+            <div class="card mt-3 " style="width: 20rem;">
+                <div class="card-body ">
+                    <h5 class="card-title">Update cards</h5>
+                    <p class="card-text">Edit the details of cards within our catalogue.</p>
+                    <a href="/editcardlist" class="btn btn-dark">Edit</a>
+                </div>
+            </div>
+        </div>
+        </div>
+
+
     </div>
+
 
 
 

@@ -26,11 +26,21 @@
           <li class="nav-item">
             <a class="nav-link" href="/catalogue">Catalogue</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/dashboard">Dashboard</a>
-          </li>
+          <% if (typeof userdata==='undefined' ) { %>
+            <li class="nav-item">
+
+            </li>
+            <% }else{ %>
+              <li class="nav-item">
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+              </li>
+              <% } %>
         </ul>
-        <a class="btn btn-outline-light" href="/logout">Logout</a>
+        <% if (typeof userdata==='undefined' ) { %>
+          <a class="btn btn-outline-light" href="/">Login</a>
+          <% }else{ %>
+            <a class="btn btn-outline-light" href="/logout">Logout</a>
+            <% } %>
       </div>
     </div>
   </nav>
@@ -39,8 +49,13 @@
     <div class="p-4 mb-4 lc-block">
       <div class="lc-block">
         <div editable="rich">
-          <h2 class="fw-bolder display-3">Hello, <%= userdata.firstname %>
-          </h2>
+          <% if (typeof userdata==='undefined' ) { %>
+            <h2 class="fw-bolder display-3">Hello, Guest!
+            </h2>
+            <% }else{ %>
+              <h2 class="fw-bolder display-3">Hello, <%= userdata.username %>!
+              </h2>
+              <% } %>
         </div>
       </div>
       <div class="lc-block col-md-8">
@@ -52,8 +67,47 @@
     </div>
   </div>
 
-  <div class="container">
-</div>
+  <div class="container my-4 text-centre">
+
+
+    <div class="row row-cols-2">
+
+      <% usercards.forEach((collection) => { %> 
+
+      <div class="col d-flex justify-content-center">
+        <div class="card mb-3" style="width: 20rem;">
+          <div class="card-body">
+            <h5 class="card-title"><%=collection.username%>'s collection</h5>
+            <p class="card-text">Search and select through cards from our catalogue and add them to your
+              collection.</p>
+            <a href="/addcard" class="btn btn-dark">Add</a>
+          </div>
+        </div>
+      </div>
+
+      <% }) %>
+
+    </div>
+
+
+    <div class="row row-cols-4 justify-content-center mt-5">
+      <h3>Our newest cards:</h3>
+    </div>
+    <div class="row row-cols-4 justify-content-center">
+      <div id="carouselExampleAutoplaying" class="carousel slide just" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          <% allcards.forEach((card, index)=> { %>
+            <div class="carousel-item <%= index === 0 ? 'active' : '' %>" data-bs-interval="3000">
+              <img src="<%= card.pokemon_img %>" class="d-block w-100" alt="...">
+            </div>
+            <% }); %>
+        </div>
+      </div>
+    </div>
+
+
+
+  </div>
 
 </body>
 

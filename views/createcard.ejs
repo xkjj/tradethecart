@@ -32,6 +32,9 @@
                         <a class="nav-link active" href="/dashboard">Dashboard</a>
                     </li>
                 </ul>
+                <div>
+                    <a class="btn" href="#">Hello, <%=userdata.username%></a>
+                </div>
                 <a class="btn btn-outline-light" href="/logout">Logout</a>
             </div>
         </div>
@@ -52,6 +55,7 @@
                     </p>
                 </div>
             </div>
+            <a class="btn btn-light" href="/dashboard">Back</a>
         </div>
     </div>
 
@@ -90,11 +94,15 @@
                           </div>
                 </div>
                 <div class="mb-3">
+                    <label for="exampleFormControlTextarea1" class="form-label">Pokemon description</label>
+                    <textarea class="form-control" name="pokemondesc_field" id="exampleFormControlTextarea1" rows="3" required></textarea>
+                  </div>
+                <div class="mb-3">
                     <label for="formGroupExampleInput4" class="form-label">Image</label>
                     <input type="text" class="form-control" name="pokemonimg_field" placeholder="Image" required>
                 </div>
 
-                <button class="btn btn-dark" type="submit">Create</button>
+                <button class="btn btn-dark mb-3" type="submit">Create</button>
             </form>
     </div>
 </body>

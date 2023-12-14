@@ -96,28 +96,37 @@ app.post('/signup', (req, res) => {
 
 app.get('/tradethecart', (req, res) => {
     const sessionobj = req.session;
-    
-    if (sessionobj.authen) {
-        const uid = sessionobj.authen;
-        const user = `SELECT * FROM tradethecart_users WHERE id = "${uid}"`;
 
-        db.query(user, (err, row) => {
+    const uid = sessionobj.authen;
+    const user = `SELECT * FROM tradethecart_users WHERE id = "${uid}"`;
+
+    db.query(user, (err, row) => {
+        if (err) throw err;
+        const firstrow = row[0];
+
+        const usercards = `SELECT
+        tradethecart_users.id AS user_id,
+        tradethecart_users.username,
+        GROUP_CONCAT(tradethecart_pokemon.id) AS card_ids
+    FROM
+        tradethecart_users
+    LEFT JOIN tradethecart_user_cards ON tradethecart_users.id = tradethecart_user_cards.user_id
+    LEFT JOIN tradethecart_pokemon ON tradethecart_user_cards.card_id = tradethecart_pokemon.id
+    GROUP BY
+        tradethecart_users.id;`;
+
+        db.query(usercards, (err, row2) => {
             if (err) throw err;
-            const firstrow = row[0];
 
-            const allcards = `(SELECT * FROM tradethecart_pokemon ORDER BY id DESC limit 5)
-            ORDER BY id ASC;`;
+            const allcards = `SELECT * FROM tradethecart_pokemon ORDER BY id DESC LIMIT 4;`;
 
-            db.query(allcards, (err,row2) => {
+            db.query(allcards, (err, row3) => {
                 if (err) throw err;
 
-                res.render('tradethecart', { userdata: firstrow, allcards: row2 });
+                res.render('tradethecart', { userdata: firstrow, usercards: row2, allcards: row3 });
             });
-            
         });
-    } else {
-        res.redirect('/noaccess');
-    }
+    });
 });
 
 app.get('/logout', (req, res) => {
@@ -137,48 +146,118 @@ app.get('/catalogue', (req, res) => {
     offset = (page - 1) * limit;
     if (Number.isNaN(offset)) offset = 0;
 
-    const showcards = `SELECT id FROM tradethecart_pokemon;
-    SELECT * FROM tradethecart_pokemon LIMIT ${limit} OFFSET ${offset}`;
+    const sessionobj = req.session;
+    const uid = sessionobj.authen;
 
-    db.query(showcards, (err, rows) => {
+    const user = `SELECT * FROM tradethecart_users WHERE id = "${uid}"`;
+
+    db.query(user, (err, row) => {
         if (err) throw err;
-        const totalRows = rows[0].length;
-        const pageCount = Math.ceil(totalRows / limit);
-        res.render('catalogue', { allcards: rows[1], num_pages: pageCount });
+        const firstrow = row[0];
 
+        const searchQuery = req.query.search;
+        const sortOption = req.query.sort;
+        switch (sortOption) {
+            case 'newest':
+                sortOrder = 'ORDER BY id DESC';
+                break;
+            case 'oldest':
+                sortOrder = 'ORDER BY id ASC';
+                break;
+            case 'a-z':
+                sortOrder = 'ORDER BY pokemon_name ASC';
+                break;
+            case 'z-a':
+                sortOrder = 'ORDER BY pokemon_name DESC';
+                break;
+            default:
+                sortOrder = 'ORDER BY pokemon_name ASC';
+                break;
+        }
+
+        let showcards;
+        if (searchQuery) {
+            showcards = `SELECT id FROM tradethecart_pokemon WHERE pokemon_name LIKE '%${searchQuery}%' 
+                      ${sortOrder};
+                     SELECT * FROM tradethecart_pokemon WHERE pokemon_name LIKE '%${searchQuery}%' 
+                         ${sortOrder} LIMIT ${limit} OFFSET ${offset}`;
+
+        } else {
+            showcards = `SELECT id FROM tradethecart_pokemon ${sortOrder};
+                    SELECT * FROM tradethecart_pokemon ${sortOrder} LIMIT ${limit} OFFSET ${offset}`;
+        }
+
+        db.query(showcards, (err, rows) => {
+            if (err) throw err;
+            const totalRows = rows[0].length;
+            const pageCount = Math.ceil(totalRows / limit);
+            res.render('catalogue', { userdata: firstrow, allcards: rows[1], num_pages: pageCount, searchQuery, sortOption });
+
+        });
     });
-
 });
 
 app.get('/yourcards', (req, res) => {
     const sessionobj = req.session;
+
     if (sessionobj.authen) {
         const uid = sessionobj.authen;
+
         const getuser = `SELECT tradethecart_users.id, tradethecart_users.firstname, tradethecart_users.username
                                 FROM tradethecart_users
-                                INNER JOIN tradethecart_user_cards ON
-                                tradethecart_users.id = tradethecart_user_cards.user_id
                                 WHERE tradethecart_users.id = ${uid};`;
 
         db.query(getuser, (err, rows) => {
             if (err) throw err;
+            const firstrow = rows[0];
 
             let getuser = rows[0].id;
-            const getcards = `SELECT * 
+
+            const searchQuery = req.query.search;
+
+            let getcards;
+            if (searchQuery) {
+                getcards = `SELECT * 
+                                FROM tradethecart_pokemon
+                                INNER JOIN tradethecart_user_cards ON
+                                tradethecart_pokemon.id = tradethecart_user_cards.card_id
+                                WHERE tradethecart_user_cards.user_id = '${getuser}' AND
+                                tradethecart_pokemon.pokemon_name LIKE '%${searchQuery}%';
+                                ;`;
+
+            } else {
+                getcards = `SELECT * 
                                 FROM tradethecart_pokemon
                                 INNER JOIN tradethecart_user_cards ON
                                 tradethecart_pokemon.id = tradethecart_user_cards.card_id
                                 WHERE tradethecart_user_cards.user_id = ${getuser};`;
+            }
 
             db.query(getcards, (err, rows2) => {
                 if (err) throw err;
-                res.render('yourcards', { userdata: rows, carddata: rows2 })
+                res.render('yourcards', { userdata: firstrow, carddata: rows2, searchQuery });
             });
         });
     } else {
         res.redirect('/noaccess');
     }
 });
+
+app.post('/yourcards', (req, res) => {
+    const sessionobj = req.session;
+    const del_id = req.body.id_field;
+    const uid = sessionobj.authen;
+
+    const deletecardsql = `DELETE FROM tradethecart_user_cards WHERE id = ${del_id} `;
+
+    db.query(deletecardsql, (err, result) => {
+        if (err) throw err;
+
+        console.log(result);
+        res.redirect('/yourcards');
+    });
+});
+
 
 app.get("/usercreated", (req, res) => {
 
@@ -214,12 +293,23 @@ app.get('/addcard', (req, res) => {
 
         db.query(user, (err, row) => {
             if (err) throw err;
+            const firstrow = row[0];
 
-            const getcards = `SELECT * FROM tradethecart_pokemon ORDER BY pokemon_name ASC`
+            const searchQuery = req.query.search;
+
+            let getcards;
+            if (searchQuery) {
+                getcards = `SELECT * FROM tradethecart_pokemon WHERE pokemon_name LIKE '%${searchQuery}%' 
+                      ORDER BY pokemon_name ASC`;
+
+            } else {
+                getcards = `SELECT * FROM tradethecart_pokemon ORDER BY pokemon_name ASC`;
+            }
+
             db.query(getcards, (err, row2) => {
                 if (err) throw err;
 
-                res.render('addcard', { userdata: row, carddata: row2 })
+                res.render('addcard', { userdata: firstrow, carddata: row2, searchQuery })
 
             });
 
@@ -231,15 +321,15 @@ app.get('/addcard', (req, res) => {
 
 app.post('/addcard', (req, res) => {
     const sessionobj = req.session;
-    const pokemon = req.body.pokemon_card;
+    const card_id = req.body.id_field;
     const uid = sessionobj.authen;
 
-    const insertcardsql = `INSERT INTO tradethecart_user_cards (user_id, card_id) VALUES ('${uid}', '${pokemon}');`;
+    const insertcardsql = `INSERT INTO tradethecart_user_cards (user_id, card_id) VALUES ('${uid}', '${card_id}');`;
 
     db.query(insertcardsql, (err, result) => {
         if (err) throw err;
 
-        res.redirect('/addcard')
+        res.redirect('/yourcards')
 
     });
 
@@ -253,6 +343,7 @@ app.get('/createcard', (req, res) => {
 
         db.query(user, (err, row) => {
             if (err) throw err;
+            const firstrow = row[0];
 
             const getcards = `SELECT * FROM tradethecart_pokemon ORDER BY pokemon_name ASC`
             db.query(getcards, (err, row2) => {
@@ -266,7 +357,7 @@ app.get('/createcard', (req, res) => {
                     db.query(getsets, (err, row4) => {
                         if (err) throw err;
 
-                        res.render('createcard', { userdata: row, carddata: row2, typedata: row3, setdata: row4 })
+                        res.render('createcard', { userdata: firstrow, carddata: row2, typedata: row3, setdata: row4 })
                     });
 
                 });
@@ -285,18 +376,19 @@ app.post('/createcard', (req, res) => {
     const pokeT = req.body.pokemontype_field;
     const pokeHP = req.body.pokemonhp_field;
     const pokeS = req.body.pokemonset_field;
+    const pokeD = req.body.pokemondesc_field;
     const pokeI = req.body.pokemonimg_field;
     const uid = sessionobj.authen;
 
-    const insertcardsql = `INSERT INTO tradethecart_pokemon (set_id, pokemon_name, pokemon_hp, type_id, pokemon_img) VALUES ('${pokeS}', '${pokeN}', '${pokeHP}', '${pokeT}', '${pokeI}');`;
+    const insertcardsql = `INSERT INTO tradethecart_pokemon (set_id, pokemon_name, pokemon_hp, type_id, description, pokemon_img) VALUES ('${pokeS}', '${pokeN}', '${pokeHP}', '${pokeT}', '${pokeD}', '${pokeI}');`;
 
-        db.query(insertcardsql, (err, result2) => {
-            if (err) throw err;
+    db.query(insertcardsql, (err, result2) => {
+        if (err) throw err;
 
-            res.redirect('/addcard')
-        });
-
+        res.redirect('/dashboard')
     });
+
+});
 
 app.get('/createset', (req, res) => {
     const sessionobj = req.session;
@@ -306,12 +398,13 @@ app.get('/createset', (req, res) => {
 
         db.query(user, (err, row) => {
             if (err) throw err;
+            const firstrow = row[0];
 
             const getsets = `SELECT * FROM tradethecart_set`
             db.query(getsets, (err, row2) => {
                 if (err) throw err;
 
-                res.render('createset', { userdata: row, setdata: row2 })
+                res.render('createset', { userdata: firstrow, setdata: row2 })
 
             });
 
@@ -335,9 +428,128 @@ app.post('/createset', (req, res) => {
 
 });
 
+app.get('/cardstats', (req, res) => {
+
+    const card_id = req.query.cid;
+
+    const onecardsql = `SELECT * FROM tradethecart_pokemon 
+                            INNER JOIN tradethecart_types 
+                            ON tradethecart_pokemon.type_id = tradethecart_types.type_id
+                            INNER JOIN tradethecart_set
+                            ON tradethecart_pokemon.set_id = tradethecart_set.set_id
+                            WHERE tradethecart_pokemon.id = ${card_id}; `;
+
+    db.query(onecardsql, (err, row) => {
+        if (err) throw err;
+        res.render('cardstats', { card: row });
+    });
+});
+
+app.get('/editcardlist', (req, res) => {
+    const sessionobj = req.session;
+    if (sessionobj.authen) {
+        const uid = sessionobj.authen;
+        const user = `SELECT * FROM tradethecart_users WHERE id = "${uid}" `;
+
+        db.query(user, (err, row) => {
+            if (err) throw err;
+            const firstrow = row[0];
+
+            const searchQuery = req.query.search;
+
+            let getcards;
+            if (searchQuery) {
+                getcards = `SELECT * FROM tradethecart_pokemon WHERE pokemon_name LIKE '%${searchQuery}%' 
+                                 ORDER BY pokemon_name ASC`;
+
+            } else {
+                getcards = `SELECT * FROM tradethecart_pokemon ORDER BY pokemon_name ASC`;
+            }
+
+            db.query(getcards, (err, row2) => {
+                if (err) throw err;
+
+                res.render('editcardlist', { userdata: firstrow, carddata: row2, searchQuery })
+
+            });
+
+        });
+    } else {
+        res.redirect('/noaccess');
+    }
+});
+
+app.get('/editcard', (req, res) => {
+    const sessionobj = req.session;
+
+    if (sessionobj.authen) {
+        const user = `SELECT * FROM tradethecart_users WHERE id = "${uid}" `;
+
+        db.query(user, (err, row) => {
+            if (err) throw err;
+            const firstrow = row[0];
+
+            const gettypes = `SELECT * FROM tradethecart_types`
+            db.query(gettypes, (err, row) => {
+                if (err) throw err;
+
+                const getsets = `SELECT * from tradethecart_set;`;
+                db.query(getsets, (err, row2) => {
+                    if (err) throw err;
+
+                    const card_id = req.query.cid;
+                    const onecardsql = `SELECT * FROM tradethecart_pokemon
+                                                INNER JOIN tradethecart_types 
+                                                ON tradethecart_pokemon.type_id = tradethecart_types.type_id
+                                                INNER JOIN tradethecart_set
+                                                ON tradethecart_pokemon.set_id = tradethecart_set.set_id
+                                                WHERE tradethecart_pokemon.id = ${card_id}; `;
+
+                    db.query(onecardsql, (err, row3) => {
+                        if (err) throw err;
+                        res.render('editcard', { userdata: firstrow, typedata: row, setdata: row2, card: row3 })
+                    });
+
+                });
+
+            });
+        });
+
+    } else {
+        res.redirect('/noaccess');
+    }
+
+    app.post('/editcard', (req, res) => {
+        const sessionobj = req.session;
+        const id_update = req.body.id_field;
+        const name_update = req.body.pokemonname_field;
+        const type_update = req.body.pokemontype_field;
+        const hp_update = req.body.pokemonhp_field;
+        const set_update = req.body.pokemonset_field;
+        const desc_update = req.body.pokemondesc_field;
+        const img_update = req.body.pokemonimg_field;
+        const uid = sessionobj.authen;
+
+        console.log('ID to be updated:', id_update);
+
+        const updatecardsql = `UPDATE tradethecart_pokemon SET pokemon_name = '${name_update}', set_id = '${set_update}', 
+                                    pokemon_hp = '${hp_update}', type_id = '${type_update}', description = '${desc_update}', pokemon_img = '${img_update}'
+                                    WHERE id = '${id_update}' `;
+
+        db.query(updatecardsql, (err, result) => {
+            if (err) throw err;
+
+            console.log(result);
+            res.redirect('/editcardlist')
+        });
+
+    });
+
+});
+
 app.get("/noaccess", (req, res) => {
 
-        res.render('noaccess');
+    res.render('noaccess');
 });
 
 

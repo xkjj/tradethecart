@@ -4,14 +4,13 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Add a card</title>
+    <title>Catalogue</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="./styles.css">
 </head>
 
 <body>
-
     <nav class="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold" href="#">tradethecart</a>
@@ -26,7 +25,7 @@
                         <a class="nav-link" aria-current="page" href="/tradethecart">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link " href="/catalogue">Catalogue</a>
+                        <a class="nav-link" href="/catalogue">Catalogue</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" href="/dashboard">Dashboard</a>
@@ -44,16 +43,17 @@
         <div class="p-4 mb-4 lc-block">
             <div class="lc-block">
                 <div editable="rich">
-                    <h2 class="fw-bolder display-3">Add a card</h2>
+                    <h2 class="fw-bolder display-3">Cards list
+                    </h2>
                 </div>
             </div>
             <div class="lc-block col-md-8">
                 <div editable="rich">
-                    <p class="lead">Search and select through cards from our catalogue and add them to your collection.
+                    <p class="lead">Select a card to update its details.
                     </p>
                 </div>
             </div>
-            <form class="d-flex" role="search" action="/addcard" method="GET">
+            <form class="d-flex" role="search" action="/editcardlist" method="GET">
                 <input class="form-control me-2" type="search" name="search" placeholder="Search for a specific card"
                     aria-label="Search">
                 <button class="btn btn-outline-light" type="submit">Search</button>
@@ -63,34 +63,30 @@
     </div>
 
     <div class="container my-4 text-centre">
+
         <h1 class="mb-4">
             <% if (searchQuery) { %> Search results for '<%= searchQuery %>'<% } %>
         </h1>
         <div class="row row-cols-4">
 
             <% carddata.forEach((card)=> { %>
-                <form action="/addcard" method="POST">
-                    <div class="col">
-                        <div class="card mb-3" style="width: 18rem;">
-                            <img src="<%=card.pokemon_img %>" class="card-img-top" alt=""
-                                style="width:286px; height:393px">
-                            <div class="card-body">
-                                <input type="hidden" class="form-control" name="id_field" value="<%=card.id%>">
-                                <h5 class="card-title">
-                                    <%= card.pokemon_name %>
-                                </h5>
-                                <p class="card-text"></p>
-                                <button class="btn btn-dark" type="submit">Add</button>
-                            </div>
+
+                <div class="col">
+                    <div class="card mb-3" style="width: 18rem;">
+                        <img src="<%=card.pokemon_img %>" class="card-img-top" alt="" style="width:286px; height:393px">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <%= card.pokemon_name %>
+                            </h5>
+                            <p class="card-text"></p>
+                            <a href="/editcard?cid=<%=card.id%>" class="btn btn-dark">Edit</a>
                         </div>
                     </div>
-                </form>
+                </div>
 
-                <% }) %>
-
+                <% }); %>
         </div>
     </div>
-
 
 </body>
 

@@ -27,11 +27,21 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="/catalogue">Catalogue</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/dashboard">Dashboard</a>
-                    </li>
+                    <% if (typeof userdata==='undefined' ) { %>
+                        <li class="nav-item">
+            
+                        </li>
+                        <% }else{ %>
+                          <li class="nav-item">
+                            <a class="nav-link" href="/dashboard">Dashboard</a>
+                          </li>
+                          <% } %>
                 </ul>
-                <a class="btn btn-outline-light" href="/logout">Logout</a>
+                <% if (typeof userdata ==='undefined' ) { %>
+                    <a class="btn btn-outline-light" href="/">Login</a>
+                    <% }else{ %>
+                      <a class="btn btn-outline-light" href="/logout">Logout</a>
+                      <% } %>
             </div>
         </div>
     </nav>
@@ -50,15 +60,37 @@
                     </p>
                 </div>
             </div>
+            <form class="d-flex" role="search" action="/catalogue" method="GET">
+                <input class="form-control me-2" type="search" name="search" placeholder="Search for a specific card"
+                    aria-label="Search">
+                <button class="btn btn-outline-light" type="submit">Search</button>
+            </form>
         </div>
     </div>
 
+
+
     <div class="container my-4 text-centre">
 
+        <div class="d-flex justify-content-between">
+            <h1 class="mb-4">
+                <% if (searchQuery) { %> Search results for '<%= searchQuery %>'<% } %>
+            </h1>
+            <div class="dropdown-center mb-3">
+                <button class="btn btn-dark btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Filter by: <%=sortOption%>
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="/catalogue?sort=recently_added&search=<%= searchQuery%>">Newest</a></li>
+                  <li><a class="dropdown-item" href="/catalogue?sort=oldest&search=<%= searchQuery%>">Oldest</a></li>
+                  <li><a class="dropdown-item" href="/catalogue?sort=a-z&search=<%= searchQuery%>">A-Z</a></li>
+                  <li><a class="dropdown-item" href="/catalogue?sort=z-a&search=<%= searchQuery%>">Z-A</a></li>
+                </ul>
+              </div>
+        </div>
+       
         <div class="row row-cols-4">
-
             <% allcards.forEach((card)=> { %>
-
                 <div class="col">
                     <div class="card mb-3" style="width: 18rem;">
                         <img src="<%=card.pokemon_img %>" class="card-img-top" alt="">
@@ -66,22 +98,21 @@
                             <h5 class="card-title">
                                 <%= card.pokemon_name %>
                             </h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk
-                                of the card's content.</p>
-                            <a href="#" class="btn btn-dark">View</a>
+                            <p class="card-text"></p>
+                            <a href="/cardstats?cid=<%=card.id%>" class="btn btn-dark">View</a>
                         </div>
                     </div>
                 </div>
-
                 <% }); %>
         </div>
     </div>
 
     <nav aria-label="Page navigation example">
         <ul class="pagination pagination-lg justify-content-center">
-
-            <% for(i=1; i <=num_pages; i++){ %>
-                <li class="page-item"><a class="page-link" href="/catalogue?page=<%=i%>"><%=i%></a></li>
+            <% for (i=1; i <=num_pages; i++) { %>
+                <li class="page-item"><a class="page-link" href="/catalogue?page=<%=i%>&sort=<%=sortOption%>&search=<%=searchQuery%>">
+                        <%=i%>
+                    </a></li>
                 <% } %>
         </ul>
     </nav>
