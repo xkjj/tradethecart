@@ -104,30 +104,15 @@ app.get('/tradethecart', (req, res) => {
         if (err) throw err;
         const firstrow = row[0];
 
-        const usercards = `SELECT
-                                tradethecart_users.id AS user_id,
-                                tradethecart_users.username,
-                                GROUP_CONCAT(tradethecart_pokemon.id) AS card_ids
-                            FROM
-                                tradethecart_users
-                            LEFT JOIN tradethecart_user_cards ON tradethecart_users.id = tradethecart_user_cards.user_id
-                            LEFT JOIN tradethecart_pokemon ON tradethecart_user_cards.card_id = tradethecart_pokemon.id
-                            GROUP BY
-                                tradethecart_users.id;`;
-
-        db.query(usercards, (err, row2) => {
-            if (err) throw err;
-
             const allcards = `SELECT * FROM tradethecart_pokemon ORDER BY id DESC LIMIT 4;`;
 
-            db.query(allcards, (err, row3) => {
+            db.query(allcards, (err, row2) => {
                 if (err) throw err;
 
-                res.render('tradethecart', { userdata: firstrow, usercards: row2, allcards: row3 });
+                res.render('tradethecart', { userdata: firstrow, allcards: row2 });
             });
         });
     });
-});
 
 app.get('/logout', (req, res) => {
 
@@ -483,6 +468,7 @@ app.get('/editcard', (req, res) => {
     const sessionobj = req.session;
 
     if (sessionobj.authen) {
+        const uid = sessionobj.authen;
         const user = `SELECT * FROM tradethecart_users WHERE id = "${uid}" `;
 
         db.query(user, (err, row) => {
@@ -546,6 +532,49 @@ app.get('/editcard', (req, res) => {
     });
 
 });
+
+app.get('/collections', (req, res) => {
+    const sessionobj = req.session;
+
+    const uid = sessionobj.authen;
+    const user = `SELECT * FROM tradethecart_users WHERE id = "${uid}"`;
+
+    db.query(user, (err, row) => {
+        if (err) throw err;
+        const firstrow = row[0];
+        const searchQuery = req.query.search
+
+        if (searchQuery) {
+            usercollections = `SELECT tradethecart_users.id AS user_id,
+                                tradethecart_users.username,
+                                GROUP_CONCAT(tradethecart_user_cards.card_id) AS user_cards,
+                                GROUP_CONCAT(tradethecart_pokemon.pokemon_img SEPARATOR ' ') AS card_images
+                                FROM tradethecart_users
+                                LEFT JOIN tradethecart_user_cards ON tradethecart_users.id = tradethecart_user_cards.user_id
+                                LEFT JOIN tradethecart_pokemon ON tradethecart_user_cards.card_id = tradethecart_pokemon.id
+                                WHERE tradethecart_user_cards.card_id IS NOT NULL AND tradethecart_users.username LIKE '%${searchQuery}%';
+                              
+                            ;`;
+
+        } else {
+            usercollections = `SELECT tradethecart_users.id AS user_id,
+                                tradethecart_users.username,
+                                GROUP_CONCAT(tradethecart_user_cards.card_id) AS user_cards,
+                                GROUP_CONCAT(tradethecart_pokemon.pokemon_img SEPARATOR ' ') AS card_images
+                                FROM tradethecart_users
+                                LEFT JOIN tradethecart_user_cards ON tradethecart_users.id = tradethecart_user_cards.user_id
+                                LEFT JOIN tradethecart_pokemon ON tradethecart_user_cards.card_id = tradethecart_pokemon.id
+                                WHERE tradethecart_user_cards.card_id IS NOT NULL
+                                GROUP BY tradethecart_users.id;`;
+        }
+
+            db.query(usercollections, (err, row2) => {
+                if (err) throw err;
+                
+                res.render('collections', { userdata: firstrow, usercards: row2, searchQuery });
+            });
+        });
+    });
 
 app.get("/noaccess", (req, res) => {
 

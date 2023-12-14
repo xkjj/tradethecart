@@ -26,6 +26,9 @@
           <li class="nav-item">
             <a class="nav-link" href="/catalogue">Catalogue</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/collections">Collections</a>
+          </li>
           <% if (typeof userdata==='undefined' ) { %>
             <li class="nav-item">
 
@@ -69,25 +72,6 @@
 
   <div class="container my-4 text-centre">
 
-
-    <div class="row row-cols-2">
-
-      <% usercards.forEach((collection) => { %> 
-
-      <div class="col d-flex justify-content-center">
-        <div class="card mb-3" style="width: 20rem;">
-          <div class="card-body">
-            <h5 class="card-title"><%=collection.username%>'s collection</h5>
-            <p class="card-text">Search and select through cards from our catalogue and add them to your
-              collection.</p>
-            <a href="/addcard" class="btn btn-dark">Add</a>
-          </div>
-        </div>
-      </div>
-
-      <% }) %>
-
-    </div>
 
 
     <div class="row row-cols-4 justify-content-center mt-5">
